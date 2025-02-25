@@ -106,6 +106,91 @@
             </div>
         </div>
     </section>
+    <div id="chat-container">
+        <div id="chat-header">
+            <span>Чат-бот</span>
+            <button id="close-chat">×</button>
+        </div>
+        <div id="chat-box">
+            <div id="chat-messages"></div>
+        </div>
+        <div id="chat-input-container">
+            <input type="text" id="chat-input" placeholder="Напишите сообщение...">
+            <button id="send-button">Отправить</button>
+        </div>
+    </div>
+    <button id="open-chat">💬 Открыть чат</button>
+    <script>
+        // URL и API-ключ DeepSeek
+        const deepseekApiUrl = "https://platform.deepseek.com/api_keys"; // Например, https://api.deepseek.com/v1/chat
+        const apiKey = "sk-e76d4254de824dabb07c8003f82c4335"; // Если требуется
+    
+        // Элементы интерфейса
+        const chatContainer = document.getElementById("chat-container");
+        const openChatButton = document.getElementById("open-chat");
+        const closeChatButton = document.getElementById("close-chat");
+        const chatMessages = document.getElementById("chat-messages");
+        const chatInput = document.getElementById("chat-input");
+        const sendButton = document.getElementById("send-button");
+    
+        // Открыть/закрыть чат
+        openChatButton.addEventListener("click", () => {
+            chatContainer.style.display = "flex";
+            openChatButton.style.display = "none";
+        });
+    
+        closeChatButton.addEventListener("click", () => {
+            chatContainer.style.display = "none";
+            openChatButton.style.display = "block";
+        });
+    
+        // Отправка сообщения
+        sendButton.addEventListener("click", async () => {
+            const userMessage = chatInput.value.trim();
+            if (userMessage) {
+                addMessage(userMessage, "user");
+                chatInput.value = "";
+    
+                // Отправка запроса к DeepSeek
+                const botResponse = await getBotResponse(userMessage);
+                addMessage(botResponse, "bot");
+            }
+        });
+    
+        // Добавление сообщения в чат
+        function addMessage(text, sender) {
+            const messageElement = document.createElement("div");
+            messageElement.classList.add("message", `${sender}-message`);
+            messageElement.textContent = text;
+            chatMessages.appendChild(messageElement);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+    
+        // Запрос к DeepSeek API
+        async function getBotResponse(userMessage) {
+            try {
+                const response = await fetch(deepseekApiUrl, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${apiKey}` // Если требуется
+                    },
+                    body: JSON.stringify({
+                        prompt: userMessage, // Текст запроса
+                        max_tokens: 150, // Максимальное количество токенов в ответе
+                        temperature: 0.7 // Параметр "творчества" ответа
+                    })
+                });
+    
+                const data = await response.json();
+                return data.choices[0].text; // Предполагаем, что ответ возвращается в таком формате
+            } catch (error) {
+                console.error("Ошибка при запросе к DeepSeek:", error);
+                return "Произошла ошибка. Пожалуйста, попробуйте позже.";
+            }
+        }
+    </script>
+    
     <section class="motivation-section">
         <div class="container">
             <h2>Мотивация для учебы</h2>
